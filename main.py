@@ -117,7 +117,7 @@ def get_duration(path: str) -> float:
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    return HTMLResponse(open("index.html").read())
+    return HTMLResponse(open("index.html", encoding="utf-8").read())
 
 
 @app.post("/editar")
