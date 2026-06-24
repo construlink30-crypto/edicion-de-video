@@ -169,41 +169,37 @@
       <div class="section-title">¿Qué quieres hacer?</div>
       <div class="options">
 
-        <label class="option" id="opt-silencio" onclick="toggleOption('silencio')">
-          <input type="checkbox" id="chk-silencio" />
+        <div class="option" id="opt-silencio" onclick="toggleOption('silencio')">
           <div class="toggle" id="toggle-silencio"></div>
           <div class="opt-text">
             <div class="opt-title">🔇 Eliminar silencios</div>
             <div class="opt-desc">Detecta y corta automáticamente las pausas y espacios vacíos del video.</div>
           </div>
-        </label>
+        </div>
 
-        <label class="option" id="opt-ruido" onclick="toggleOption('ruido')">
-          <input type="checkbox" id="chk-ruido" />
+        <div class="option" id="opt-ruido" onclick="toggleOption('ruido')">
           <div class="toggle" id="toggle-ruido"></div>
           <div class="opt-text">
             <div class="opt-title">🎙️ Reducir ruido de fondo</div>
             <div class="opt-desc">Filtra ruidos externos como viento, ventilador, calle o estática.</div>
           </div>
-        </label>
+        </div>
 
-        <label class="option" id="opt-subtitulos" onclick="toggleOption('subtitulos')">
-          <input type="checkbox" id="chk-subtitulos" />
+        <div class="option" id="opt-subtitulos" onclick="toggleOption('subtitulos')">
           <div class="toggle" id="toggle-subtitulos"></div>
           <div class="opt-text">
             <div class="opt-title">📝 Generar subtítulos automáticos</div>
             <div class="opt-desc">Transcribe el audio con IA (Whisper) y quema los subtítulos en el video.</div>
           </div>
-        </label>
+        </div>
 
-        <label class="option" id="opt-musica" onclick="toggleOption('musica')">
-          <input type="checkbox" id="chk-musica" />
+        <div class="option" id="opt-musica" onclick="toggleOption('musica')">
           <div class="toggle" id="toggle-musica"></div>
           <div class="opt-text">
             <div class="opt-title">🎵 Agregar música de fondo</div>
             <div class="opt-desc">Mezcla una canción de fondo con el audio original del video.</div>
           </div>
-        </label>
+        </div>
 
         <!-- Music file upload (visible only when musica is active) -->
         <div class="music-upload" id="music-upload">
