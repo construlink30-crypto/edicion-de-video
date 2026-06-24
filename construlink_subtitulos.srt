@@ -1,0 +1,75 @@
+1
+00:00:00,000 --> 00:00:14,000
+Argentine construction is a sector of 19,000 companies that
+generate 354,000 formal jobs, but it operates like 20 years
+ago, with 73% labor informality and without digital tools.
+
+2
+00:00:14,000 --> 00:00:18,000
+We are solving that with Construlink.
+
+3
+00:00:18,000 --> 00:00:33,000
+Construction companies, developers, and architecture studios
+need to hire specialists quickly. Today they do it by word
+of mouth and WhatsApp.
+
+4
+00:00:33,000 --> 00:00:41,000
+There's no way to validate if the contractor is legal, if
+they fulfill commitments, or if they'll deliver on time. And
+when there are conflicts, there is no record of anything.
+
+5
+00:00:41,000 --> 00:00:52,000
+This generates distrust, delays, and lost money. It's a
+structural problem in the sector. Construlink integrates
+four things in a single platform.
+
+6
+00:00:52,000 --> 00:01:01,000
+First, an intelligent marketplace where construction
+companies find contractors verified by trade, location, and
+reputation.
+
+7
+00:01:01,000 --> 00:01:09,000
+Second, validation of legal documentation in real time, with
+a traffic light that shows if someone is legal, under
+review, or at risk.
+
+8
+00:01:09,000 --> 00:01:17,000
+Third, a construction management tool where milestones,
+budgets, and inventory are centralized; all digital and
+collaborative.
+
+9
+00:01:17,000 --> 00:01:30,000
+And fourth, a payment system secured with escrow—funds held
+until each milestone is completed, protecting both parties.
+
+10
+00:01:30,000 --> 00:01:44,000
+Procore and Construex are pure ERPs without a marketplace.
+Lifeive and Workana are generic marketplaces without legal
+compliance. Kliquie is only residential.
+
+11
+00:01:44,000 --> 00:01:56,000
+We are the only platform in LATAM integrating these four
+pillars in one place, designed from within the Argentine
+sector.
+
+12
+00:01:56,000 --> 00:02:12,000
+We have a functional MVP, interviews with companies ready to
+pilot, and real traction. The team: Franco, architect, built
+the MVP from scratch; Huissen, architect, works in the
+
+13
+00:02:12,000 --> 00:03:17,000
+We're looking to validate hypotheses with users in Córdoba.
+Then scale provincially and to LATAM. We come from
+EmprendeU. We are in EmprendeLatam. If you see the potential
+
