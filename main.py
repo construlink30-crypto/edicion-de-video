@@ -180,6 +180,54 @@ def parse_prompt(prompt: str) -> dict:
 
 # ── FastAPI endpoints ─────────────────────────────────────────────────────────
 
+@app.get("/diagnostico")
+async def diagnostico():
+    results = {}
+
+    # ffmpeg path
+    results["ffmpeg"] = FFMPEG
+
+    # codecs disponibles
+    _, stderr = run_cmd([FFMPEG, "-codecs"])
+    results["libx264"] = "libx264" in stderr
+    results["aac"]     = "aac" in stderr
+
+    # whisper
+    try:
+        import whisper
+        results["whisper"] = True
+    except Exception as e:
+        results["whisper"] = str(e)
+
+    # test simple ffmpeg (genera 3s de video negro)
+    test_in  = str(UPLOAD_DIR / "test_in.mp4")
+    test_out = str(UPLOAD_DIR / "test_out.mp4")
+    ok, err = run_cmd([FFMPEG, "-y", "-f", "lavfi", "-i", "color=black:s=320x240:d=3",
+                       "-f", "lavfi", "-i", "sine=frequency=440:d=3",
+                       "-c:v", "libx264", "-c:a", "aac", test_in])
+    results["ffmpeg_generate_test"] = ok
+    if not ok:
+        # try without libx264
+        ok2, err2 = run_cmd([FFMPEG, "-y", "-f", "lavfi", "-i", "color=black:s=320x240:d=3",
+                             "-f", "lavfi", "-i", "sine=frequency=440:d=3",
+                             test_in])
+        results["ffmpeg_generate_fallback"] = ok2
+        results["ffmpeg_error"] = err[-500:]
+
+    if Path(test_in).exists():
+        # test silence detection
+        segs = detect_speech_segments(test_in)
+        results["silence_detection"] = segs
+
+        # test noise reduction
+        ok3, err3 = reduce_noise(test_in, test_out)
+        results["noise_reduction"] = ok3
+        if not ok3:
+            results["noise_error"] = err3[-500:]
+
+    return JSONResponse(results)
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index():
     return HTMLResponse(open("index.html", encoding="utf-8").read())
