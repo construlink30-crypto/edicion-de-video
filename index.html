@@ -5,246 +5,371 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Editor de Video con IA</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #0f0f0f;
-      color: #f0f0f0;
+      background: #0d0d0d;
+      color: #e8e8e8;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
+      padding: 40px 16px 60px;
     }
-    h1 { font-size: 2rem; margin-bottom: 8px; }
-    p.sub { color: #888; margin-bottom: 36px; font-size: 0.95rem; }
+    h1 { font-size: 2rem; font-weight: 700; margin-bottom: 6px; }
+    .sub { color: #777; font-size: 0.92rem; margin-bottom: 36px; }
 
     .card {
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      border-radius: 16px;
+      background: #161616;
+      border: 1px solid #252525;
+      border-radius: 18px;
       padding: 32px;
       width: 100%;
-      max-width: 600px;
+      max-width: 620px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
     }
 
+    /* Drop zone */
     .drop-zone {
-      border: 2px dashed #444;
-      border-radius: 12px;
-      padding: 40px;
+      border: 2px dashed #333;
+      border-radius: 14px;
+      padding: 36px 20px;
       text-align: center;
       cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
+      transition: border-color .2s, background .2s;
+      position: relative;
     }
-    .drop-zone:hover, .drop-zone.drag-over {
-      border-color: #7c6af0;
-      background: #1e1b33;
-    }
-    .drop-zone input { display: none; }
-    .drop-zone .icon { font-size: 2.5rem; margin-bottom: 12px; }
-    .drop-zone .label { font-size: 0.95rem; color: #aaa; }
-    .drop-zone .file-name { color: #7c6af0; margin-top: 8px; font-weight: 600; }
+    .drop-zone:hover, .drop-zone.drag-over { border-color: #7c6af0; background: #1a1730; }
+    .drop-zone input[type=file] { display: none; }
+    .drop-zone .dz-icon { font-size: 2.4rem; margin-bottom: 10px; }
+    .drop-zone .dz-label { color: #888; font-size: 0.9rem; }
+    .drop-zone .dz-name { color: #7c6af0; font-weight: 600; margin-top: 8px; font-size: 0.9rem; word-break: break-all; }
 
-    label { font-size: 0.85rem; color: #aaa; margin-bottom: 4px; display: block; }
+    /* Section title */
+    .section-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: #666; margin-bottom: 12px; }
 
-    textarea {
-      width: 100%;
-      background: #111;
-      border: 1px solid #333;
-      border-radius: 10px;
-      color: #f0f0f0;
-      font-size: 0.95rem;
-      padding: 14px;
-      resize: vertical;
-      min-height: 100px;
-      font-family: inherit;
-      transition: border-color 0.2s;
-    }
-    textarea:focus { outline: none; border-color: #7c6af0; }
-
-    .examples {
+    /* Toggle options */
+    .options { display: flex; flex-direction: column; gap: 12px; }
+    .option {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .example-chip {
-      background: #252535;
-      border: 1px solid #3a3a5a;
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 0.8rem;
+      align-items: flex-start;
+      gap: 14px;
+      background: #1c1c1c;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 14px 16px;
       cursor: pointer;
-      color: #bbb;
-      transition: background 0.2s;
+      transition: border-color .2s, background .2s;
     }
-    .example-chip:hover { background: #2e2e50; color: #fff; }
+    .option:hover { border-color: #444; background: #202020; }
+    .option.active { border-color: #7c6af0; background: #1a1730; }
+    .option input[type=checkbox] { display: none; }
+    .option .toggle {
+      width: 22px; height: 22px; min-width: 22px;
+      border: 2px solid #444;
+      border-radius: 6px;
+      margin-top: 1px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      transition: background .2s, border-color .2s;
+    }
+    .option.active .toggle { background: #7c6af0; border-color: #7c6af0; }
+    .option .opt-text .opt-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
+    .option .opt-text .opt-desc { color: #777; font-size: 0.82rem; }
 
-    button.btn {
+    /* Music upload */
+    .music-upload {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .music-upload.visible { display: flex; }
+    .music-btn {
+      background: #222;
+      border: 1px dashed #444;
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #aaa;
+      font-size: 0.88rem;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color .2s;
+    }
+    .music-btn:hover { border-color: #7c6af0; color: #ccc; }
+    .music-btn input { display: none; }
+
+    /* Process button */
+    .btn {
       background: #7c6af0;
       color: white;
       border: none;
-      border-radius: 10px;
-      padding: 14px;
+      border-radius: 12px;
+      padding: 15px;
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background .2s, opacity .2s;
+      letter-spacing: 0.02em;
     }
-    button.btn:hover { background: #6a58d8; }
-    button.btn:disabled { background: #444; cursor: not-allowed; }
+    .btn:hover { background: #6a58e0; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
-    .status {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #aaa;
-      min-height: 20px;
-    }
+    /* Progress */
+    .progress-wrap { display: none; flex-direction: column; gap: 10px; }
+    .progress-bar-bg { background: #222; border-radius: 99px; height: 8px; overflow: hidden; }
+    .progress-bar { height: 100%; background: #7c6af0; border-radius: 99px; width: 0%; transition: width .4s; }
+    .progress-label { font-size: 0.85rem; color: #aaa; text-align: center; }
 
-    .result {
-      display: none;
-      flex-direction: column;
-      gap: 12px;
-      align-items: center;
-    }
-    .result video {
-      width: 100%;
-      border-radius: 10px;
-      max-height: 300px;
-    }
-    .result a.download {
-      background: #22c55e;
-      color: white;
-      padding: 12px 28px;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-    .result a.download:hover { background: #16a34a; }
+    /* Logs */
+    .logs { display: none; background: #111; border: 1px solid #222; border-radius: 10px; padding: 12px 14px; font-size: 0.8rem; color: #aaa; line-height: 1.7; }
+    .logs span { display: block; }
+    .logs span::before { content: "✓ "; color: #22c55e; }
+    .logs span.err::before { content: "✗ "; color: #f87171; }
 
-    .spinner {
-      display: inline-block;
-      width: 18px; height: 18px;
-      border: 3px solid #555;
-      border-top-color: #7c6af0;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      vertical-align: middle;
-      margin-right: 8px;
+    /* Result */
+    .result { display: none; flex-direction: column; gap: 14px; align-items: center; }
+    .result video { width: 100%; border-radius: 12px; max-height: 320px; background: #000; }
+    .download-btn {
+      background: #22c55e; color: white;
+      padding: 13px 32px; border-radius: 12px;
+      text-decoration: none; font-weight: 700; font-size: 1rem;
+      transition: background .2s;
     }
+    .download-btn:hover { background: #16a34a; }
+
+    /* Error */
+    .error-box { display: none; background: #1e0a0a; border: 1px solid #7f1d1d; border-radius: 10px; padding: 14px; font-size: 0.82rem; color: #f87171; white-space: pre-wrap; word-break: break-all; }
+
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2.5px solid #555; border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 8px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    .error { color: #f87171; background: #2a1010; border: 1px solid #7f1d1d; border-radius: 8px; padding: 12px; font-size: 0.85rem; }
   </style>
 </head>
 <body>
   <h1>🎬 Editor de Video con IA</h1>
-  <p class="sub">Sube tu video, describe qué quieres y listo para descargar.</p>
+  <p class="sub">Sube tu video, elige las ediciones y descarga el resultado.</p>
 
   <div class="card">
-    <!-- Drop zone -->
-    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-      <div class="icon">📁</div>
-      <div class="label">Arrastra tu video aquí o haz clic para seleccionar</div>
-      <div class="file-name" id="fileName"></div>
-      <input type="file" id="fileInput" accept="video/*" />
+
+    <!-- Video upload -->
+    <div>
+      <div class="section-title">Video a editar</div>
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('videoInput').click()">
+        <div class="dz-icon">📹</div>
+        <div class="dz-label">Arrastra tu video aquí o haz clic para seleccionar</div>
+        <div class="dz-name" id="videoName"></div>
+        <input type="file" id="videoInput" accept="video/*" onchange="onVideoSelected(this)" />
+      </div>
     </div>
 
-    <!-- Prompt -->
+    <!-- Options -->
     <div>
-      <label>¿Qué quieres hacer con el video?</label>
-      <textarea id="prompt" placeholder="Ej: Recorta del segundo 5 al 20, agrega el texto 'Mi Empresa' arriba"></textarea>
-    </div>
+      <div class="section-title">¿Qué quieres hacer?</div>
+      <div class="options">
 
-    <!-- Ejemplos -->
-    <div>
-      <label>Ejemplos de prompts:</label>
-      <div class="examples">
-        <span class="example-chip" onclick="setPrompt(this)">Elimina los silencios</span>
-        <span class="example-chip" onclick="setPrompt(this)">Quita el ruido de fondo</span>
-        <span class="example-chip" onclick="setPrompt(this)">Elimina silencios y quita ruido de fondo</span>
-        <span class="example-chip" onclick="setPrompt(this)">Recorta del segundo 0 al 15</span>
-        <span class="example-chip" onclick="setPrompt(this)">Agrega el texto 'Oferta especial' arriba</span>
-        <span class="example-chip" onclick="setPrompt(this)">Doble velocidad</span>
-        <span class="example-chip" onclick="setPrompt(this)">Quita el audio</span>
-        <span class="example-chip" onclick="setPrompt(this)">Sube el volumen</span>
-        <span class="example-chip" onclick="setPrompt(this)">Cambia a 720p</span>
-        <span class="example-chip" onclick="setPrompt(this)">Recorta del segundo 5 al 30 y agrega texto 'WhatsApp' abajo</span>
+        <label class="option" id="opt-silencio" onclick="toggleOption('silencio')">
+          <input type="checkbox" id="chk-silencio" />
+          <div class="toggle" id="toggle-silencio"></div>
+          <div class="opt-text">
+            <div class="opt-title">🔇 Eliminar silencios</div>
+            <div class="opt-desc">Detecta y corta automáticamente las pausas y espacios vacíos del video.</div>
+          </div>
+        </label>
+
+        <label class="option" id="opt-ruido" onclick="toggleOption('ruido')">
+          <input type="checkbox" id="chk-ruido" />
+          <div class="toggle" id="toggle-ruido"></div>
+          <div class="opt-text">
+            <div class="opt-title">🎙️ Reducir ruido de fondo</div>
+            <div class="opt-desc">Filtra ruidos externos como viento, ventilador, calle o estática.</div>
+          </div>
+        </label>
+
+        <label class="option" id="opt-subtitulos" onclick="toggleOption('subtitulos')">
+          <input type="checkbox" id="chk-subtitulos" />
+          <div class="toggle" id="toggle-subtitulos"></div>
+          <div class="opt-text">
+            <div class="opt-title">📝 Generar subtítulos automáticos</div>
+            <div class="opt-desc">Transcribe el audio con IA (Whisper) y quema los subtítulos en el video.</div>
+          </div>
+        </label>
+
+        <label class="option" id="opt-musica" onclick="toggleOption('musica')">
+          <input type="checkbox" id="chk-musica" />
+          <div class="toggle" id="toggle-musica"></div>
+          <div class="opt-text">
+            <div class="opt-title">🎵 Agregar música de fondo</div>
+            <div class="opt-desc">Mezcla una canción de fondo con el audio original del video.</div>
+          </div>
+        </label>
+
+        <!-- Music file upload (visible only when musica is active) -->
+        <div class="music-upload" id="music-upload">
+          <div class="music-btn" onclick="document.getElementById('musicInput').click()">
+            🎵 <span id="musicName">Haz clic para seleccionar el archivo de música (MP3, WAV, etc.)</span>
+            <input type="file" id="musicInput" accept="audio/*" onchange="onMusicSelected(this)" />
+          </div>
+        </div>
+
       </div>
     </div>
 
     <button class="btn" id="btn" onclick="procesar()">Procesar video</button>
-    <div class="status" id="status"></div>
+
+    <!-- Progress -->
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-label" id="progressLabel">Iniciando...</div>
+    </div>
+
+    <!-- Logs -->
+    <div class="logs" id="logs"></div>
+
+    <!-- Error -->
+    <div class="error-box" id="errorBox"></div>
 
     <!-- Result -->
     <div class="result" id="result">
       <video id="preview" controls></video>
-      <a class="download" id="downloadLink" href="#" download>⬇ Descargar video</a>
+      <a class="download-btn" id="downloadLink" href="#" download="video_editado.mp4">⬇ Descargar video editado</a>
     </div>
+
   </div>
 
   <script>
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('fileInput');
-    const fileName = document.getElementById('fileName');
+    const state = { silencio: false, ruido: false, subtitulos: false, musica: false };
+    const progressSteps = [
+      "Subiendo video...",
+      "Reduciendo ruido de fondo...",
+      "Eliminando silencios...",
+      "Generando subtítulos con IA (puede tardar unos minutos)...",
+      "Quemando subtítulos en el video...",
+      "Mezclando música de fondo...",
+      "Finalizando...",
+    ];
 
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files[0]) fileName.textContent = fileInput.files[0].name;
-    });
+    function toggleOption(key) {
+      state[key] = !state[key];
+      const opt = document.getElementById('opt-' + key);
+      const toggle = document.getElementById('toggle-' + key);
+      opt.classList.toggle('active', state[key]);
+      toggle.textContent = state[key] ? '✓' : '';
+      if (key === 'musica') {
+        document.getElementById('music-upload').classList.toggle('visible', state[key]);
+      }
+    }
 
-    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-    dropZone.addEventListener('drop', e => {
-      e.preventDefault();
-      dropZone.classList.remove('drag-over');
+    function onVideoSelected(input) {
+      if (input.files[0]) {
+        document.getElementById('videoName').textContent = input.files[0].name;
+      }
+    }
+
+    function onMusicSelected(input) {
+      if (input.files[0]) {
+        document.getElementById('musicName').textContent = input.files[0].name;
+      }
+    }
+
+    // Drag & drop
+    const dz = document.getElementById('dropZone');
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop', e => {
+      e.preventDefault(); dz.classList.remove('drag-over');
       if (e.dataTransfer.files[0]) {
-        fileInput.files = e.dataTransfer.files;
-        fileName.textContent = e.dataTransfer.files[0].name;
+        document.getElementById('videoInput').files = e.dataTransfer.files;
+        document.getElementById('videoName').textContent = e.dataTransfer.files[0].name;
       }
     });
 
-    function setPrompt(el) {
-      document.getElementById('prompt').value = el.textContent;
+    function setProgress(pct, label) {
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressLabel').textContent = label;
+    }
+
+    function showLogs(logs) {
+      const el = document.getElementById('logs');
+      if (!logs || !logs.length) return;
+      el.style.display = 'block';
+      el.innerHTML = logs.map(l => {
+        const isErr = l.toLowerCase().includes('error');
+        return `<span class="${isErr ? 'err' : ''}">${l}</span>`;
+      }).join('');
     }
 
     async function procesar() {
-      const file = fileInput.files[0];
-      const prompt = document.getElementById('prompt').value.trim();
+      const videoInput = document.getElementById('videoInput');
+      const musicInput = document.getElementById('musicInput');
       const btn = document.getElementById('btn');
-      const status = document.getElementById('status');
-      const result = document.getElementById('result');
 
-      if (!file) return alert('Selecciona un video primero.');
-      if (!prompt) return alert('Escribe qué quieres hacer con el video.');
+      if (!videoInput.files[0]) { alert('Selecciona un video primero.'); return; }
+      if (!state.silencio && !state.ruido && !state.subtitulos && !state.musica) {
+        alert('Selecciona al menos una opción de edición.'); return;
+      }
+      if (state.musica && !musicInput.files[0]) {
+        alert('Selecciona un archivo de música.'); return;
+      }
 
+      // Reset UI
       btn.disabled = true;
-      result.style.display = 'none';
-      status.innerHTML = '<span class="spinner"></span>Procesando video...';
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('errorBox').style.display = 'none';
+      document.getElementById('logs').style.display = 'none';
+      document.getElementById('progressWrap').style.display = 'flex';
+      btn.innerHTML = '<span class="spinner"></span>Procesando...';
+
+      setProgress(5, 'Subiendo video...');
 
       const form = new FormData();
-      form.append('video', file);
-      form.append('prompt', prompt);
+      form.append('video', videoInput.files[0]);
+      if (state.musica && musicInput.files[0]) form.append('music', musicInput.files[0]);
+      form.append('eliminar_silencios', state.silencio);
+      form.append('reducir_ruido', state.ruido);
+      form.append('agregar_subtitulos', state.subtitulos);
+      form.append('agregar_musica', state.musica && !!musicInput.files[0]);
+
+      // Fake progress animation while waiting
+      let progressPct = 10;
+      const ticker = setInterval(() => {
+        if (progressPct < 88) {
+          progressPct += state.subtitulos ? 0.4 : 1.2;
+          const idx = Math.min(Math.floor(progressPct / 20), progressSteps.length - 1);
+          setProgress(progressPct, progressSteps[idx]);
+        }
+      }, 500);
 
       try {
-        const res = await fetch('/editar', { method: 'POST', body: form });
+        const res = await fetch('/procesar', { method: 'POST', body: form });
         const data = await res.json();
+        clearInterval(ticker);
 
         if (data.error) {
-          status.innerHTML = `<div class="error"><b>Error:</b> ${data.error}</div>`;
+          setProgress(0, '');
+          document.getElementById('progressWrap').style.display = 'none';
+          document.getElementById('errorBox').style.display = 'block';
+          document.getElementById('errorBox').textContent = 'Error: ' + data.error;
+          showLogs(data.logs);
         } else {
-          status.innerHTML = '✅ ¡Video listo!';
-          document.getElementById('preview').src = data.url;
-          document.getElementById('downloadLink').href = data.url;
-          document.getElementById('downloadLink').download = 'video_editado.mp4';
-          result.style.display = 'flex';
+          setProgress(100, '¡Listo!');
+          setTimeout(() => {
+            document.getElementById('progressWrap').style.display = 'none';
+            document.getElementById('result').style.display = 'flex';
+            document.getElementById('preview').src = data.url;
+            document.getElementById('downloadLink').href = data.url;
+            showLogs(data.logs);
+          }, 600);
         }
       } catch (e) {
-        status.innerHTML = `<div class="error">Error de conexión: ${e.message}</div>`;
+        clearInterval(ticker);
+        document.getElementById('progressWrap').style.display = 'none';
+        document.getElementById('errorBox').style.display = 'block';
+        document.getElementById('errorBox').textContent = 'Error de conexión: ' + e.message;
       } finally {
         btn.disabled = false;
+        btn.innerHTML = 'Procesar video';
       }
     }
   </script>

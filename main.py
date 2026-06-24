@@ -1,15 +1,19 @@
 import os
 import re
 import subprocess
+import sys
 import uuid
 from pathlib import Path
 
 import imageio_ffmpeg
 from fastapi import FastAPI, File, Form, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
+# Make ffmpeg available on PATH for whisper
+os.environ["PATH"] = str(Path(FFMPEG).parent) + os.pathsep + os.environ.get("PATH", "")
+
 UPLOAD_DIR = Path("uploads")
 OUTPUT_DIR = Path("outputs")
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -19,125 +23,8 @@ app = FastAPI()
 app.mount("/outputs", StaticFiles(directory="outputs"), name="outputs")
 
 
-def parse_prompt(prompt: str, duration: float):
-    """Convert natural language prompt to ffmpeg filter args."""
-    prompt_lower = prompt.lower()
-    video_filters = []
-    audio_filters = []
-    extra_args = []
-
-    # --- trim / cut ---
-    trim_match = re.search(
-        r"recorta?\s+(?:del?\s+)?(?:segundo\s+)?(\d+(?:\.\d+)?)\s+(?:al?|hasta)\s+(?:el?\s+)?(?:segundo\s+)?(\d+(?:\.\d+)?)",
-        prompt_lower,
-    )
-    if not trim_match:
-        trim_match = re.search(
-            r"corta?\s+(?:del?\s+)?(\d+(?:\.\d+)?)\s+(?:al?|hasta)\s+(\d+(?:\.\d+)?)",
-            prompt_lower,
-        )
-    if trim_match:
-        start = float(trim_match.group(1))
-        end = float(trim_match.group(2))
-        extra_args += ["-ss", str(start), "-to", str(end)]
-
-    # --- speed ---
-    speed_match = re.search(r"(\d+(?:\.\d+)?)\s*x\s*(?:de\s+)?velocidad|velocidad\s+(\d+(?:\.\d+)?)", prompt_lower)
-    if not speed_match:
-        speed_match = re.search(r"(doble|triple|mitad)\s*(?:de\s+)?velocidad", prompt_lower)
-    speed = 1.0
-    if speed_match:
-        word = speed_match.group(0)
-        if "doble" in word:
-            speed = 2.0
-        elif "triple" in word:
-            speed = 3.0
-        elif "mitad" in word:
-            speed = 0.5
-        else:
-            val = speed_match.group(1) or speed_match.group(2)
-            if val:
-                speed = float(val)
-    if speed != 1.0:
-        video_filters.append(f"setpts={1/speed}*PTS")
-        audio_filters.append(f"atempo={min(max(speed, 0.5), 2.0)}")
-
-    # --- text overlay ---
-    text_match = re.search(
-        r'(?:agrega?|pon|escribe|a[ñn]ade?)\s+(?:el\s+)?(?:texto\s+)?["\']?([^"\']+?)["\']?\s*(?:arriba|abajo|encima|centro|en\s+|$)',
-        prompt_lower,
-    )
-    position = "bottom"
-    if "arriba" in prompt_lower or "encima" in prompt_lower:
-        position = "top"
-    elif "centro" in prompt_lower or "center" in prompt_lower:
-        position = "center"
-
-    if text_match:
-        text = text_match.group(1).strip().rstrip("'\"")
-        y_pos = {"top": "50", "center": "(h-text_h)/2", "bottom": "h-th-50"}[position]
-        video_filters.append(
-            f"drawtext=text='{text}':fontcolor=white:fontsize=48:borderw=3:bordercolor=black"
-            f":x=(w-text_w)/2:y={y_pos}"
-        )
-
-    # --- resolution ---
-    if "720p" in prompt_lower:
-        video_filters.append("scale=1280:720")
-    elif "1080p" in prompt_lower:
-        video_filters.append("scale=1920:1080")
-    elif "480p" in prompt_lower:
-        video_filters.append("scale=854:480")
-
-    # --- rotate ---
-    if "rotar 90" in prompt_lower or "girar 90" in prompt_lower:
-        video_filters.append("transpose=1")
-    elif "rotar 180" in prompt_lower or "girar 180" in prompt_lower:
-        video_filters.append("transpose=1,transpose=1")
-    elif "rotar 270" in prompt_lower or "girar 270" in prompt_lower:
-        video_filters.append("transpose=2")
-
-    # --- mute audio ---
-    if ("quita" in prompt_lower and "audio" in prompt_lower) or "sin audio" in prompt_lower or "sin sonido" in prompt_lower:
-        extra_args += ["-an"]
-
-    # --- silence removal ---
-    wants_silence_removal = any(w in prompt_lower for w in [
-        "silencio", "silencios", "partes silenciosas", "elimina silencio",
-        "quita silencio", "borra silencio", "remove silence", "corta silencio"
-    ])
-    if wants_silence_removal:
-        # Remove silence shorter than 2s at start/between/end, threshold -35dB
-        audio_filters.append("silenceremove=start_periods=1:start_duration=0.3:start_threshold=-35dB:stop_periods=-1:stop_duration=0.5:stop_threshold=-35dB")
-
-    # --- noise reduction ---
-    wants_noise_reduction = any(w in prompt_lower for w in [
-        "ruido", "ruidos", "ruido externo", "ruidos externos", "fondo", "ruido de fondo",
-        "noise", "elimina ruido", "quita ruido", "reduce ruido", "limpia audio",
-        "limpiar audio", "audio limpio"
-    ])
-    if wants_noise_reduction:
-        # afftdn: FFT-based audio denoiser — works great for background hiss/hum
-        audio_filters.append("afftdn=nf=-25")
-
-    # --- volume boost ---
-    vol_match = re.search(r"(?:sube|aumenta|incrementa)\s+(?:el\s+)?volumen\s+(\d+)", prompt_lower)
-    if vol_match:
-        db = int(vol_match.group(1))
-        audio_filters.append(f"volume={db}dB")
-    elif any(w in prompt_lower for w in ["sube el volumen", "aumenta el volumen", "mas volumen", "más volumen"]):
-        audio_filters.append("volume=5dB")
-    elif any(w in prompt_lower for w in ["baja el volumen", "reduce el volumen", "menos volumen"]):
-        audio_filters.append("volume=-5dB")
-
-    return video_filters, audio_filters, extra_args
-
-
 def get_duration(path: str) -> float:
-    result = subprocess.run(
-        [FFMPEG, "-i", path],
-        capture_output=True, text=True
-    )
+    result = subprocess.run([FFMPEG, "-i", path], capture_output=True, text=True)
     m = re.search(r"Duration:\s+(\d+):(\d+):(\d+\.?\d*)", result.stderr)
     if m:
         h, mi, s = m.groups()
@@ -145,47 +32,184 @@ def get_duration(path: str) -> float:
     return 0.0
 
 
+def run_ffmpeg(cmd: list, label: str = "") -> tuple[bool, str]:
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        return False, result.stderr[-2000:]
+    return True, ""
+
+
+def remove_silence(input_path: str, output_path: str) -> tuple[bool, str]:
+    cmd = [
+        FFMPEG, "-y", "-i", input_path,
+        "-af", "silenceremove=start_periods=1:start_duration=0.3:start_threshold=-35dB:stop_periods=-1:stop_duration=0.5:stop_threshold=-35dB",
+        "-c:v", "copy",
+        output_path,
+    ]
+    return run_ffmpeg(cmd, "silence removal")
+
+
+def reduce_noise(input_path: str, output_path: str) -> tuple[bool, str]:
+    cmd = [
+        FFMPEG, "-y", "-i", input_path,
+        "-af", "afftdn=nf=-25",
+        "-c:v", "copy",
+        output_path,
+    ]
+    return run_ffmpeg(cmd, "noise reduction")
+
+
+def generate_subtitles(input_path: str, srt_path: str) -> tuple[bool, str]:
+    try:
+        import whisper
+        model = whisper.load_model("base")
+        result = model.transcribe(input_path, word_timestamps=False)
+        segments = result.get("segments", [])
+
+        with open(srt_path, "w", encoding="utf-8") as f:
+            for i, seg in enumerate(segments, 1):
+                start = format_srt_time(seg["start"])
+                end = format_srt_time(seg["end"])
+                text = seg["text"].strip()
+                f.write(f"{i}\n{start} --> {end}\n{text}\n\n")
+
+        return True, ""
+    except ImportError:
+        return False, "whisper no instalado. Corre: pip install openai-whisper"
+    except Exception as e:
+        return False, str(e)
+
+
+def format_srt_time(seconds: float) -> str:
+    h = int(seconds // 3600)
+    m = int((seconds % 3600) // 60)
+    s = int(seconds % 60)
+    ms = int((seconds % 1) * 1000)
+    return f"{h:02}:{m:02}:{s:02},{ms:03}"
+
+
+def burn_subtitles(input_path: str, srt_path: str, output_path: str) -> tuple[bool, str]:
+    # Escape path for ffmpeg subtitles filter (Windows backslashes)
+    safe_srt = srt_path.replace("\\", "/").replace(":", "\\:")
+    cmd = [
+        FFMPEG, "-y", "-i", input_path,
+        "-vf", f"subtitles='{safe_srt}':force_style='FontSize=22,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,Outline=2,Alignment=2'",
+        "-c:a", "copy",
+        output_path,
+    ]
+    return run_ffmpeg(cmd, "burn subtitles")
+
+
+def add_background_music(input_path: str, music_path: str, output_path: str, music_volume: float = 0.15) -> tuple[bool, str]:
+    cmd = [
+        FFMPEG, "-y",
+        "-i", input_path,
+        "-stream_loop", "-1", "-i", music_path,
+        "-filter_complex",
+        f"[0:a]volume=1.0[voice];[1:a]volume={music_volume}[music];[voice][music]amix=inputs=2:duration=first:dropout_transition=2[aout]",
+        "-map", "0:v", "-map", "[aout]",
+        "-shortest",
+        "-c:v", "copy", "-c:a", "aac",
+        output_path,
+    ]
+    return run_ffmpeg(cmd, "background music")
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index():
     return HTMLResponse(open("index.html", encoding="utf-8").read())
 
 
-@app.post("/editar")
-async def editar(
+@app.post("/procesar")
+async def procesar(
     video: UploadFile = File(...),
-    prompt: str = Form(...),
+    music: UploadFile = File(None),
+    eliminar_silencios: str = Form("false"),
+    reducir_ruido: str = Form("false"),
+    agregar_subtitulos: str = Form("false"),
+    agregar_musica: str = Form("false"),
 ):
-    ext = Path(video.filename).suffix or ".mp4"
     uid = uuid.uuid4().hex
-    input_path = UPLOAD_DIR / f"{uid}_input{ext}"
-    output_path = OUTPUT_DIR / f"{uid}_output.mp4"
+    ext = Path(video.filename).suffix or ".mp4"
 
+    input_path = str(UPLOAD_DIR / f"{uid}_input{ext}")
     with open(input_path, "wb") as f:
         f.write(await video.read())
 
-    duration = get_duration(str(input_path))
-    video_filters, audio_filters, extra_args = parse_prompt(prompt, duration)
+    music_path = None
+    if music and music.filename:
+        mext = Path(music.filename).suffix or ".mp3"
+        music_path = str(UPLOAD_DIR / f"{uid}_music{mext}")
+        with open(music_path, "wb") as f:
+            f.write(await music.read())
 
-    cmd = [FFMPEG, "-y"]
-    cmd += extra_args
-    cmd += ["-i", str(input_path)]
-    if video_filters:
-        cmd += ["-vf", ",".join(video_filters)]
-    if audio_filters:
-        cmd += ["-af", ",".join(audio_filters)]
-    cmd += ["-c:a", "aac", str(output_path)]
+    current = input_path
+    step = 0
+    logs = []
 
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    def next_path(label):
+        nonlocal step
+        step += 1
+        return str(UPLOAD_DIR / f"{uid}_step{step}_{label}.mp4")
 
-    if result.returncode != 0 or not output_path.exists():
-        return {"error": result.stderr[-1000:]}
+    # 1. Reduce noise
+    if reducir_ruido.lower() == "true":
+        out = next_path("noise")
+        ok, err = reduce_noise(current, out)
+        if ok:
+            current = out
+            logs.append("Ruido reducido")
+        else:
+            logs.append(f"Error reduciendo ruido: {err[:200]}")
 
-    return {"url": f"/outputs/{output_path.name}"}
+    # 2. Remove silence
+    if eliminar_silencios.lower() == "true":
+        out = next_path("silence")
+        ok, err = remove_silence(current, out)
+        if ok:
+            current = out
+            logs.append("Silencios eliminados")
+        else:
+            logs.append(f"Error eliminando silencios: {err[:200]}")
 
+    # 3. Generate and burn subtitles
+    if agregar_subtitulos.lower() == "true":
+        srt_path = str(UPLOAD_DIR / f"{uid}.srt")
+        ok, err = generate_subtitles(current, srt_path)
+        if ok:
+            out = next_path("subtitles")
+            ok2, err2 = burn_subtitles(current, srt_path, out)
+            if ok2:
+                current = out
+                logs.append("Subtitulos generados y quemados")
+            else:
+                logs.append(f"Error quemando subtitulos: {err2[:200]}")
+        else:
+            logs.append(f"Error generando subtitulos: {err[:200]}")
 
-@app.get("/descargar/{filename}")
-async def descargar(filename: str):
-    path = OUTPUT_DIR / filename
-    if not path.exists():
-        return {"error": "Archivo no encontrado"}
-    return FileResponse(path, media_type="video/mp4", filename=filename)
+    # 4. Add background music
+    if agregar_musica.lower() == "true" and music_path:
+        out = next_path("music")
+        ok, err = add_background_music(current, music_path, out)
+        if ok:
+            current = out
+            logs.append("Musica de fondo agregada")
+        else:
+            logs.append(f"Error agregando musica: {err[:200]}")
+
+    # Copy final result to output dir
+    final_output = str(OUTPUT_DIR / f"{uid}_final.mp4")
+    cmd = [FFMPEG, "-y", "-i", current, "-c", "copy", final_output]
+    ok, err = run_ffmpeg(cmd)
+    if not ok:
+        # try re-encode as fallback
+        cmd2 = [FFMPEG, "-y", "-i", current, final_output]
+        ok, err = run_ffmpeg(cmd2)
+
+    if not ok or not Path(final_output).exists():
+        return JSONResponse({"error": err, "logs": logs})
+
+    return JSONResponse({
+        "url": f"/outputs/{Path(final_output).name}",
+        "logs": logs,
+    })
