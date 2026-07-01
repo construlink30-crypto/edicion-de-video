@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConstruLink - Brand Identity</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            color: #0052cc;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+        
+        .tagline {
+            font-size: 20px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .section {
+            margin-bottom: 80px;
+        }
+        
+        h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 40px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #0052cc;
+            display: inline-block;
+        }
+        
+        .logo-concepts {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .concept {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .concept:hover {
+            border-color: #0052cc;
+            box-shadow: 0 10px 30px rgba(0, 82, 204, 0.1);
+        }
+        
+        .logo-canvas {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 40px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            position: relative;
+        }
+        
+        svg {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+        }
+        
+        .concept-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0052cc;
+            margin-bottom: 12px;
+        }
+        
+        .concept-desc {
+            font-size: 14px;
+            color: #6b7280;
+            text-align: left;
+            line-height: 1.8;
+        }
+        
+        /* Typography Section */
+        .typography-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        
+        .typography-sample {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 30px;
+        }
+        
+        .typo-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+        
+        .display-font {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+        
+        .body-font {
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 400;
+            color: #4b5563;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+        
+        .font-specs {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #6b7280;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* Color Palette */
+        .palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+        
+        .color-card {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .color-swatch {
+            height: 120px;
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 10px;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .color-info {
+            padding: 20px;
+            background: white;
+        }
+        
+        .color-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        
+        .color-code {
+            font-size: 12px;
+            color: #6b7280;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 8px;
+        }
+        
+        .color-desc {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        /* Primary Color */
+        .primary { background: #0052cc; }
+        .primary-light { background: #f0f5ff; }
+        
+        /* Secondary */
+        .secondary { background: #22c55e; }
+        .warning { background: #ff6b35; }
+        
+        /* Neutrals */
+        .dark { background: #1f2937; }
+        .medium { background: #6b7280; }
+        .light { background: #f3f4f6; }
+        .white-bg { background: #ffffff; border: 1px solid #d1d5db; }
+        
+        /* Status Colors */
+        .error { background: #ef4444; }
+        .success { background: #10b981; }
+        .warning-state { background: #fbbf24; }
+        
+        /* Mockups */
+        .mockups {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+        
+        .mockup {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .mockup-image {
+            background: #f9fafb;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #9ca3af;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .mockup-label {
+            padding: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .logo-small {
+            width: 40px;
+            height: 40px;
+            background: #0052cc;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .logo-medium {
+            width: 80px;
+            height: auto;
+            background: white;
+        }
+        
+        /* Guidelines */
+        .guidelines {
+            background: #f0f5ff;
+            border-left: 4px solid #0052cc;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+        
+        .guidelines h3 {
+            color: #0052cc;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .guidelines ul {
+            list-style: none;
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 2;
+        }
+        
+        .guidelines li:before {
+            content: "✓ ";
+            color: #22c55e;
+            font-weight: 700;
+            margin-right: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid #e5e7eb;
+            color: #9ca3af;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 1024px) {
+            .logo-concepts {
+                grid-template-columns: 1fr;
+            }
+            
+            .typography-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 36px;
+            }
+            
+            h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>ConstruLink</h1>
+            <p class="tagline">"Donde se construye confianza"</p>
+            <p style="font-size: 14px; color: #9ca3af; margin-top: 15px;">Brand Identity System v1.0</p>
+        </header>
+
+        <!-- Logo Concepts -->
+        <section class="section">
+            <h2>Conceptos de Logo</h2>
+            
+            <div class="logo-concepts">
+                <!-- Concepto 1 -->
+                <div class="concept">
+                    <div class="logo-canvas">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Eslabón estilizado -->
+                            <g stroke="#0052cc" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M 30 50 Q 30 35 45 35 Q 60 35 60 50 Q 60 65 45 65 Q 30 65 30 50"/>
+                                <path d="M 40 50 Q 40 40 50 40 Q 60 40 60 50 Q 60 60 50 60 Q 40 60 40 50"/>
+                                <!-- Checkmark dentro -->
+                                <path d="M 45 50 L 48 53 L 55 46" stroke-width="2.5"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="concept-title">The Link & Trust</div>
+                    <div class="concept-desc">
+                        <strong>Icono:</strong> Eslabón + verificación integrados
+                        <br><br>
+                        Representa la cadena de construcción conectada con validación y compliance. Símbolo reconocible en cualquier tamaño, transmite conexión + seguridad.
+                        <br><br>
+                        <em>Psicología: Confianza, validación, integración</em>
+                    </div>
+                </div>
+                
+                <!-- Concepto 2 -->
+                <div class="concept">
+                    <div class="logo-canvas">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Estructura geométrica -->
+                            <g fill="none" stroke="#0052cc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <!-- Línea superior izquierda -->
+                                <path d="M 25 50 L 50 30"/>
+                                <!-- Línea superior derecha -->
+                                <path d="M 75 50 L 50 30"/>
+                                <!-- Línea inferior izquierda -->
+                                <path d="M 25 50 L 50 70"/>
+                                <!-- Línea inferior derecha -->
+                                <path d="M 75 50 L 50 70"/>
+                                <!-- Centro abierto (círculo) -->
+                                <circle cx="50" cy="50" r="12" fill="none"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="concept-title">The Unified Structure</div>
+                    <div class="concept-desc">
+                        <strong>Icono:</strong> Estructura geométrica integrada
+                        <br><br>
+                        Lineas que convergen en centro = integración de pilares. Centro abierto = marketplace y transparencia. Forma similar a estructura/edificio.
+                        <br><br>
+                        <em>Psicología: Solidez, integración, estabilidad</em>
+                    </div>
+                </div>
+                
+                <!-- Concepto 3 -->
+                <div class="concept">
+                    <div class="logo-canvas">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Hexágono con cadena -->
+                            <g stroke="#0052cc" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <!-- Hexágono -->
+                                <path d="M 50 25 L 70 35 L 70 55 L 50 65 L 30 55 L 30 35 Z"/>
+                                <!-- Eslabones dentro -->
+                                <circle cx="40" cy="45" r="5"/>
+                                <circle cx="60" cy="45" r="5"/>
+                                <line x1="45" y1="45" x2="55" y2="45" stroke-width="2"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="concept-title">The Chain of Trust</div>
+                    <div class="concept-desc">
+                        <strong>Icono:</strong> Cadena integrada en hexágono
+                        <br><br>
+                        Hexágono = seguridad y estructura. Cadena que conecta = integración. Dinámico pero contenido, moderno y tech-forward.
+                        <br><br>
+                        <em>Psicología: Conexión, confianza, completud</em>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Typography -->
+        <section class="section">
+            <h2>Tipografía Corporativa</h2>
+            
+            <div class="typography-grid">
+                <!-- Display Font -->
+                <div class="typography-sample">
+                    <div class="typo-label">Display / Headlines</div>
+                    <div class="display-font">DM Sans Bold</div>
+                    <div class="font-specs">
+                        Font: DM Sans<br>
+                        Weight: 700 (Bold)<br>
+                        Size: 48px / 32px / 24px<br>
+                        Letter Spacing: -0.5px
+                    </div>
+                    <div style="margin-top: 20px; font-size: 13px; color: #6b7280;">
+                        Uso: Títulos principales, headlines, logo wordmark. Moderna, confiable, seria.
+                    </div>
+                </div>
+                
+                <!-- Body Font -->
+                <div class="typography-sample">
+                    <div class="typo-label">Body / Interface</div>
+                    <div class="body-font">Inter Regular</div>
+                    <div class="font-specs">
+                        Font: Inter<br>
+                        Weight: 400 (Regular) / 600 (SemiBold)<br>
+                        Size: 16px / 14px / 12px<br>
+                        Line Height: 1.5 – 1.8
+                    </div>
+                    <div style="margin-top: 20px; font-size: 13px; color: #6b7280;">
+                        Uso: Textos largos, interfaces, body copy. Altamente legible, accesible, neutral.
+                    </div>
+                </div>
+            </div>
+
+            <div class="guidelines">
+                <h3>Jerarquía Tipográfica</h3>
+                <ul>
+                    <li><strong>H1 (48px):</strong> Títulos de página principal</li>
+                    <li><strong>H2 (32px):</strong> Títulos de sección</li>
+                    <li><strong>H3 (24px):</strong> Subtítulos y headers</li>
+                    <li><strong>Body (16px):</strong> Texto principal</li>
+                    <li><strong>Small (12px):</strong> Etiquetas, captions, metadata</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Color Palette -->
+        <section class="section">
+            <h2>Paleta de Colores</h2>
+            
+            <div class="palette">
+                <!-- Primary -->
+                <div class="color-card">
+                    <div class="color-swatch primary">#0052CC</div>
+                    <div class="color-info">
+                        <div class="color-name">ConstruLink Blue</div>
+                        <div class="color-code">HEX: #0052CC</div>
+                        <div class="color-code">RGB: 0, 82, 204</div>
+                        <div class="color-desc">Confianza, profesionalismo, seguridad. Uso: Logo, botones CTA, highlights.</div>
+                    </div>
+                </div>
+                
+                <!-- Secondary Green -->
+                <div class="color-card">
+                    <div class="color-swatch secondary">#22C55E</div>
+                    <div class="color-info">
+                        <div class="color-name">Verification Green</div>
+                        <div class="color-code">HEX: #22C55E</div>
+                        <div class="color-code">RGB: 34, 197, 94</div>
+                        <div class="color-desc">Validación, éxito. Uso: Checkmarks, badges positivas.</div>
+                    </div>
+                </div>
+                
+                <!-- Secondary Orange -->
+                <div class="color-card">
+                    <div class="color-swatch warning">#FF6B35</div>
+                    <div class="color-info">
+                        <div class="color-name">Progress Orange</div>
+                        <div class="color-code">HEX: #FF6B35</div>
+                        <div class="color-code">RGB: 255, 107, 53</div>
+                        <div class="color-desc">Energía, progreso. Uso: Acentos, alerts, CTAs alternos.</div>
+                    </div>
+                </div>
+                
+                <!-- Dark Gray -->
+                <div class="color-card">
+                    <div class="color-swatch dark">#1F2937</div>
+                    <div class="color-info">
+                        <div class="color-name">Text Dark</div>
+                        <div class="color-code">HEX: #1F2937</div>
+                        <div class="color-code">RGB: 31, 41, 55</div>
+                        <div class="color-desc">Textos principales, alto contraste.</div>
+                    </div>
+                </div>
+                
+                <!-- Medium Gray -->
+                <div class="color-card">
+                    <div class="color-swatch medium">#6B7280</div>
+                    <div class="color-info">
+                        <div class="color-name">Text Medium</div>
+                        <div class="color-code">HEX: #6B7280</div>
+                        <div class="color-code">RGB: 107, 114, 128</div>
+                        <div class="color-desc">Textos secundarios, subtítulos.</div>
+                    </div>
+                </div>
+                
+                <!-- Light Gray -->
+                <div class="color-card">
+                    <div class="color-swatch light">#F3F4F6</div>
+                    <div class="color-info">
+                        <div class="color-name">Background Light</div>
+                        <div class="color-code">HEX: #F3F4F6</div>
+                        <div class="color-code">RGB: 243, 244, 246</div>
+                        <div class="color-desc">Fondos suaves, secciones.</div>
+                    </div>
+                </div>
+                
+                <!-- Error -->
+                <div class="color-card">
+                    <div class="color-swatch error">#EF4444</div>
+                    <div class="color-info">
+                        <div class="color-name">Error Red</div>
+                        <div class="color-code">HEX: #EF4444</div>
+                        <div class="color-desc">Errores, validaciones negativas.</div>
+                    </div>
+                </div>
+                
+                <!-- Success -->
+                <div class="color-card">
+                    <div class="color-swatch success">#10B981</div>
+                    <div class="color-info">
+                        <div class="color-name">Success Emerald</div>
+                        <div class="color-code">HEX: #10B981</div>
+                        <div class="color-desc">Estados completados, éxito.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mockups -->
+        <section class="section">
+            <h2>Aplicaciones Básicas</h2>
+            
+            <div class="mockups">
+                <div class="mockup">
+                    <div class="mockup-image">
+                        [Logo en fondo blanco - 1:1]
+                    </div>
+                    <div class="mockup-label">Logo Versión Positiva</div>
+                </div>
+                
+                <div class="mockup">
+                    <div class="mockup-image" style="background: #0052cc;">
+                        [Logo en fondo azul - inverted]
+                    </div>
+                    <div class="mockup-label">Logo Versión Negativa</div>
+                </div>
+                
+                <div class="mockup">
+                    <div class="mockup-image">
+                        [Isotipo/Marca de símbolo solamente]
+                    </div>
+                    <div class="mockup-label">Isotipo (Avatar)</div>
+                </div>
+                
+                <div class="mockup">
+                    <div class="mockup-image">
+                        [Logo + Wordmark horizontal]
+                    </div>
+                    <div class="mockup-label">Logo Horizontal</div>
+                </div>
+                
+                <div class="mockup">
+                    <div class="mockup-image">
+                        [Logo + Wordmark vertical]
+                    </div>
+                    <div class="mockup-label">Logo Vertical</div>
+                </div>
+                
+                <div class="mockup">
+                    <div class="mockup-image">
+                        [Favicon 16x16 / 32x32]
+                    </div>
+                    <div class="mockup-label">Favicon & App Icon</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Guidelines -->
+        <section class="section">
+            <h2>Lineamientos de Aplicación</h2>
+            
+            <div class="guidelines">
+                <h3>✓ Qué SÍ hacer</h3>
+                <ul>
+                    <li>Usar logo en color primario (#0052CC) sobre fondos claros</li>
+                    <li>Mantener espacio blanco mínimo de 20px alrededor del logo</li>
+                    <li>Escalar proporcionalmente (nunca distorsionar)</li>
+                    <li>Usar tipografía especificada en displays y body text</li>
+                    <li>Combinar colores primario + secundario para acentos</li>
+                    <li>Mantener contraste alto en textos (WCAG AA mínimo)</li>
+                </ul>
+            </div>
+            
+            <div class="guidelines" style="background: #fef2f2; border-left-color: #ef4444;">
+                <h3 style="color: #ef4444;">✗ Qué NO hacer</h3>
+                <ul style="list-style-position: inside;">
+                    <li>❌ No distorsionar o inclinar el logo</li>
+                    <li>❌ No cambiar los colores sin justificación</li>
+                    <li>❌ No usar tipografía diferente a las especificadas</li>
+                    <li>❌ No aplicar efectos (sombras, degradados) sin autorización</li>
+                    <li>❌ No reducir logo a tamaño menor a 40px sin aprobación</li>
+                    <li>❌ No usar colores adicionales sin documentación</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>ConstruLink Brand Identity System v1.0 — Diseñado para profesionalismo, confianza y claridad en el ecosistema de construcción digital Argentina</p>
+            <p style="margin-top: 15px;">© 2026 ConstruLink. Todos los derechos reservados.</p>
+        </footer>
+    </div>
+</body>
+</html>
